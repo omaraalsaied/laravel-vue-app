@@ -3,12 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Mail\WelcomeEmail;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\MailController;
 
 class AuthenticationController extends Controller
 {
+
+    public function __construct(MailController $mailController)
+    {
+        $this->mailController = $mailController;
+    }
+
     public function register(Request $request)
     {
         $valid_data = $request->validate([
@@ -19,6 +27,7 @@ class AuthenticationController extends Controller
 
         $user = User::create($valid_data);
         $token = $user->createToken('Personal Access Token')->accessToken;
+        $this->mailController->sendWelcomeEmail($user);
         return response()->json(['user' => $user, 'token' => $token], 201);
     }
 
