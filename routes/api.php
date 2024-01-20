@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\Api\AuthenticationController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\PostController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthenticationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,8 +15,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(["namespace"=> "Api","prefix"=> "v1"], function () {
-    Route::post('register', [AuthenticationController::class,'register']);
-    Route::post('login', [AuthenticationController::class,'login']);
-    Route::post('logout', [AuthenticationController::class,'logout'])->middleware('auth:api');
+Route::group(["namespace" => "Api", "prefix" => "v1"], function () {
+    Route::post('register', [AuthenticationController::class, 'register']);
+    Route::post('login', [AuthenticationController::class, 'login']);
+
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::post('logout', [AuthenticationController::class, 'logout']);
+        Route::get('/', [PostController::class, 'index']);
+
+        Route::group(['prefix' => 'posts'], function () {
+            Route::get('/', [PostController::class, 'index']);
+            Route::get('{id}', [PostController::class, 'show']);
+            Route::post('store', [PostController::class, 'store']);
+            Route::patch('update/{id}', [PostController::class, 'update']);
+            Route::delete('{id}', [PostController::class, 'destroy']);
+        });
+
+    });
+
 });
